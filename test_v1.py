@@ -93,6 +93,36 @@ df = df[(df["Tot IMA"] < 650) & (df["Tot IMA"] > 20)]
 # filter out bad high speed distance
 df = df[(df["High Speed Distance"] < 1000)]
 
+# filter out bad IMA Accel Low
+df = df[(df["IMA Accel Low"] < 30)]
+
+# filter out bad IMA Accel Medium
+df = df[(df["IMA Accel Medium"] < 11)]
+
+# filter out bad IMA Accel High
+df = df[(df["IMA Accel High"] < 13.1)]
+
+# filter out bad IMA Decel Low
+df = df[(df["IMA Decel Low"] < 31)]
+
+# filter out bad IMA Decel Medium
+df = df[(df["IMA Decel Medium"] < 15)]
+
+# filter out bad IMA Decel High
+df = df[(df["IMA Decel High"] < 10)]
+
+# filter out bad Band 1
+df = df[(df["Velocity Band 1 Total Distance"] < 2200)]
+
+# filter out bad Band 2
+df = df[(df["Velocity Band 2 Total Distance"] < 4000)]
+
+# filter out bad Band 4
+df = df[(df["Velocity Band 4 Total Distance"] < 6200)]
+
+# filter out bad Band 5
+df = df[(df["Velocity Band 5 Total Distance"] < 500)]
+
 # filter out bad max velocities
 df = df[(df["Maximum Velocity"] > 2) & (df["Maximum Velocity"] < 8)]
 
@@ -119,22 +149,24 @@ def normalize_by_players(df):
 
     return df
 
-
+# # heatmap
 # corrmat = df.corr()
-# k = 10 #number of variables for heatmap
+# k = 10 # number of variables for heatmap
 # cols = corrmat.nlargest(k, 'Total Player Load')['Total Player Load'].index
 # cm = np.corrcoef(df[cols].values.T)
 # sns.set(font_scale=1.25)
 # hm = sns.heatmap(cm, cbar=True, annot=True, square=True, fmt='.2f', annot_kws={'size': 10}, yticklabels=cols.values, xticklabels=cols.values)
 # plt.show()
 
-plt.figure(figsize=(8,6))
-sns.violinplot(x='Position Name', y='Total Player Load', data=df)
-plt.ylabel("Player Load", fontsize=12)
-plt.xlabel("Position Name", fontsize=12)
-plt.title("Position Name vs Player Load", fontsize=15)
-plt.show()
+# # violinplot
+# plt.figure(figsize=(8,6))
+# sns.violinplot(x='Position Name', y='Total Player Load', data=df)
+# plt.ylabel("Player Load", fontsize=12)
+# plt.xlabel("Position Name", fontsize=12)
+# plt.title("Position Name vs Player Load", fontsize=15)
+# plt.show()
 
+# # each position vs count
 # plt.figure(figsize=(8,6))
 # sns.countplot(df[TARGET])
 # plt.xlabel("Position Code", fontsize=12)
@@ -142,14 +174,62 @@ plt.show()
 # plt.title("Position vs Count", fontsize=15)
 # plt.show()
 
+# # ?
 # plt.figure(figsize=(8,6))
-# sns.catplot(x=df[TARGET], y=df['ID'].unique(), data=df, kind='bar')
+# sns.catplot(x=df[TARGET], y=df['ID'], data=df)
 # plt.xlabel("Position Code", fontsize=12)
 # plt.ylabel("Num of Unique Players", fontsize=12)
 # plt.title("Position Code vs Num of Unique Players", fontsize=15)
 # plt.show()
 
-print(df['ID'])
 # normalize_by_players(df)
 
-print(df.head())
+# dist for Total Distance
+# plt.figure(figsize=(8,6))
+# # sns.distplot(df['Total Distance'], label='Distance')
+# sns.distplot(np.log(df['Total Distance']), label='Log Distance')
+# plt.legend()
+# plt.xlabel("Total Distance", fontsize=12)
+# plt.title("Total Distance Distribution", fontsize=15)
+# plt.show()
+
+# # dist for Tot IMA
+# plt.figure(figsize=(8,6))
+# sns.distplot(np.log(df['Tot IMA']), label='IMA')
+# plt.legend()
+# plt.xlabel("Tot IMA", fontsize=12)
+# plt.title("Tot IMA Distribution", fontsize=15)
+# plt.show()
+
+def des_series(df_feature):
+    print('summary: {}'.format(df_feature.describe()))
+    print('.9 quantile: {}'.format(df_feature.quantile(.9)))
+    print('.99 quantile: {}'.format(df_feature.quantile(.99)))
+    print('.995 quantile: {}'.format(df_feature.quantile(.995)))
+    print('.999 quantile: {}'.format(df_feature.quantile(.999)))
+
+# des_series(df['Velocity Band 3 Total Distance'])
+
+print(pd.cut(df['Velocity Band 1 Total Distance'], 5))
+
+# # dist for IMA Accel
+# plt.figure(figsize=(8,6))
+# sns.distplot(df['IMA Accel High'], label='H')
+# sns.distplot(df['IMA Accel Low'], label='L')
+# sns.distplot(df['IMA Accel Medium'], label='M')
+# plt.legend()
+# plt.xlabel("IMA Accel ", fontsize=12)
+# plt.title("IMA Accel Distribution", fontsize=15)
+# plt.show()
+
+# # dist for IMA Decel
+# plt.figure(figsize=(8,6))
+# sns.distplot(df['IMA Decel High'], label='H')
+# sns.distplot(df['IMA Decel Low'], label='L')
+# sns.distplot(df['IMA Decel Medium'], label='M')
+# plt.legend()
+# plt.xlabel("IMA Decel", fontsize=12)
+# plt.title("IMA Decel Distribution", fontsize=15)
+# plt.show()
+
+print(df.shape)
