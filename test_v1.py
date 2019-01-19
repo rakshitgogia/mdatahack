@@ -7,8 +7,6 @@ import matplotlib.pyplot as plt
 
 from sklearn.preprocessing import MinMaxScaler
 
-# from tqdm import tqdm_notebook as tqdm
-
 import warnings
 warnings.simplefilter(action='ignore')
 
@@ -72,9 +70,9 @@ df.drop('Period Name', axis=1, inplace=True)
 # print(df['period_name'].value_counts())
 
 # encode target
-# dic = {'Back': 0, 'Forward': 1, 'Mid/Back': 2,
-#        'Mid': 3, 'Mid/Forward': 4, 'Goalkeeper': 5}
-# df["Position Name"] = df["Position Name"].apply(lambda x: dic[x])
+dic = {'Back': 0, 'Forward': 1, 'Mid/Back': 2,
+       'Mid': 3, 'Mid/Forward': 4, 'Goalkeeper': 5}
+df["Position Name"] = df["Position Name"].apply(lambda x: dic[x])
 
 # convert new features to int8
 df["ID"] = df["ID"].astype('int8')
@@ -234,11 +232,41 @@ print(pd.cut(df['Velocity Band 1 Total Distance'], 5))
 
 print(df.shape)
 
-grouped2 = df.groupby('Position Name')
-print(grouped2.head())
-positionVsID = grouped2['ID'].agg(lambda x: tuple(x.unique()))
-positionVsIDCount = grouped2['ID'].nunique()
+df_grouped_position = df.groupby('Position Name')
+positionVsID = df_grouped_position['ID'].agg(lambda x: tuple(x.unique()))
+positionVsIDCount = df_grouped_position['ID'].nunique()
 positionVsIDCount.plot(kind='bar')
 plt.xlabel("Position Code", fontsize=12)
+ax = plt.gca()
+ax.set_xticklabels(dic.keys())
 plt.ylabel("Num of Unique Players", fontsize=12)
 plt.show()
+
+# attributes = ['IMA CoD Right Medium']
+# bins = np.linspace(0, 25, 50)
+# for attribute in attributes:
+#     for i, value in enumerate(dic.keys()):
+#         subset_name = "df_" + value
+#         df.loc[df["Position Name"] == i]
+#         df[subset_name] = df[[df["Position Name"] == i]
+#         # print(subset_name[attribute].head())
+#         print(subset_name)
+#         print(df[subset_name].info())
+#         plt.hist(df[subset_name][attribute], bins, label=value)
+#         # plt.hist(subset_name[attribute], label=value)
+#     plt.legend(loc='upper right')
+#     plt.title("Histogram of " + attribute)
+#     plt.show()
+
+
+attributes = ['IMA CoD Right Medium']
+bins = np.linspace(0, 30, 60)
+for attribute in attributes:
+    for i, value in enumerate(dic.keys()):
+        df_i = df[df["Position Name"] == i]
+        # print(df_i[attribute].head())
+        print(value + " : " + str(len(df_i[attribute])))
+        plt.hist(df_i[attribute], bins, label=value)
+        plt.legend(loc='upper right')
+        plt.title("Histogram of " + attribute)
+        plt.show()
