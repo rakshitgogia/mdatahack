@@ -67,27 +67,33 @@ df.drop('Period Name', axis=1, inplace=True)
 # encode target
 dic = {'Back': 0, 'Forward': 1, 'Mid/Back': 2,
        'Mid': 3, 'Mid/Forward': 4, 'Goalkeeper': 5}
+
 df["Position Name"] = df["Position Name"].apply(lambda x: dic[x])
 
-# convert new features to int8
 df["ID"] = df["ID"].astype('int8')
 df["practice_or_game"] = df["practice_or_game"].astype('int8')
 df["new_period"] = df["new_period"].astype('int8')
 
+print(df.dtypes)
 
-# filter out invalid distances
-df = df[(df["Total Distance"] < 20000) & (df["Total Distance"] > 50)]
+# print(df['Position Name'].value_counts())
 
-# filter out bad player loads
-df = df[(df["Total Player Load"] < 1250) & (df["Total Player Load"] > 50)]
 
-# filter out bad 'Total IMAs'
-df = df[(df["Tot IMA"] < 650) & (df["Tot IMA"] > 20)]
-
-# filter out bad high speed distance
-df = df[(df["High Speed Distance"] < 1000)]
-
-# filter out bad max velocities
-df = df[(df["Maximum Velocity"] > 2) & (df["Maximum Velocity"] < 8)]
-
-print(df.isnull().sum())
+# #filter out water breaks
+# df_cleaned = df[(df["Activity Name"] != "Water Break")]
+#
+# #filter out invalid distances
+# df_cleaned = df_cleaned[(df_cleaned["Total Distance"] < 20000) & (df_cleaned["Total Distance"] > 50)]
+#
+# #filter out bad player loads
+# df_cleaned = df_cleaned[(df_cleaned["Total Player Load"] < 1250) & (df_cleaned["Total Player Load"] > 50)]
+#
+# #filter out bad 'Total IMAs'
+# df_cleaned = df_cleaned[(df_cleaned["Tot IMA"] < 650) & (df_cleaned["Tot IMA"] > 20)]
+#
+# #filter out bad high speed distance
+# df_cleaned = df_cleaned[(df_cleaned["High Speed Distance"] < 1000)]
+#
+# #filter out bad max velocities
+# df_cleaned = df_cleaned[(df_cleaned["Maximum Velocity"] > 2) & (df_cleaned["Maximum Velocity"] < 8)]
+#
