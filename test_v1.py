@@ -90,4 +90,5 @@ df = df[(df["High Speed Distance"] < 1000)]
 # filter out bad max velocities
 df = df[(df["Maximum Velocity"] > 2) & (df["Maximum Velocity"] < 8)]
 
-print(df.isnull().sum())
+# removed all null
+df = df.dropna(how='any',axis=0)
