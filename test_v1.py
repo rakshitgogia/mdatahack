@@ -70,8 +70,8 @@ df.drop('Period Name', axis=1, inplace=True)
 # print(df['period_name'].value_counts())
 
 # encode target
-dic = {'Back': 0, 'Forward': 1, 'Mid/Back': 2,
-       'Mid': 3, 'Mid/Forward': 4, 'Goalkeeper': 5}
+dic = {'Goalkeeper': 0, 'Back': 1, 'Mid/Back': 2,
+       'Mid': 3, 'Mid/Forward': 4, 'Forward': 5}
 df["Position Name"] = df["Position Name"].apply(lambda x: dic[x])
 
 # convert new features to int8
@@ -257,16 +257,45 @@ plt.show()
 #     plt.legend(loc='upper right')
 #     plt.title("Histogram of " + attribute)
 #     plt.show()
+from matplotlib import gridspec
+
+df['Mystery Factor'] = df['Total Player Load']/df['Total Distance']
 
 
-attributes = ['IMA CoD Right Medium']
-bins = np.linspace(0, 30, 60)
+attributes = ['Mystery Factor', 'IMA CoD Right Medium', 'IMA CoD Left Medium', 'IMA CoD Left High']
+
 for attribute in attributes:
+    fig = plt.figure()
+    columns = 2
+    rows = int(len(dic)/2)
+    gs = gridspec.GridSpec(rows, columns)
+    low = df[attribute].min()
+    high = df[attribute].quantile(0.99)
+    bins = np.linspace(low, high, 50)
+    # fig, ax_array = plt.subplots(rows, columns, squeeze=False)
+    # ax0, ax1, ax2, ax3, ax4, ax5 = axes.flatten()
     for i, value in enumerate(dic.keys()):
+        print(type(i))
+        ax = fig.add_subplot(gs[i])
         df_i = df[df["Position Name"] == i]
         # print(df_i[attribute].head())
         print(value + " : " + str(len(df_i[attribute])))
-        plt.hist(df_i[attribute], bins, label=value)
-        plt.legend(loc='upper right')
-        plt.title("Histogram of " + attribute)
-        plt.show()
+        ax.hist(df_i[attribute], bins, label=value)
+        ax.set_xlim(low, high)
+# plt.legend(loc='upper right')
+        hist_title = value
+        ax.set_title(hist_title)
+    fig.suptitle(attribute)
+    fig.tight_layout()
+    fig.show()
+
+
+
+
+# for i,ax_row in enumerate(ax_array):
+#     for j,axes in enumerate(ax_row):
+#         axes.set_title('{},{}'.format(i,j))
+#         axes.set_yticklabels([])
+#         axes.set_xticklabels([])
+# #         axes.plot(you_data_goes_here,'r-')
+# plt.show()
