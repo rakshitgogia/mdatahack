@@ -91,3 +91,4 @@ df_cleaned["Maximum Velocity"].plot('hist')
 plt.title("Distribution of Maximum Velcocities")
 plt.xlabel("Maximum Velocity")
 plt.show()
+

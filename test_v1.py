@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 from sklearn.preprocessing import MinMaxScaler
 
-from tqdm import tqdm_notebook as tqdm
+# from tqdm import tqdm_notebook as tqdm
 
 import warnings
 warnings.simplefilter(action='ignore')
@@ -72,9 +72,9 @@ df.drop('Period Name', axis=1, inplace=True)
 # print(df['period_name'].value_counts())
 
 # encode target
-dic = {'Back': 0, 'Forward': 1, 'Mid/Back': 2,
-       'Mid': 3, 'Mid/Forward': 4, 'Goalkeeper': 5}
-df["Position Name"] = df["Position Name"].apply(lambda x: dic[x])
+# dic = {'Back': 0, 'Forward': 1, 'Mid/Back': 2,
+#        'Mid': 3, 'Mid/Forward': 4, 'Goalkeeper': 5}
+# df["Position Name"] = df["Position Name"].apply(lambda x: dic[x])
 
 # convert new features to int8
 df["ID"] = df["ID"].astype('int8')
@@ -233,3 +233,12 @@ print(pd.cut(df['Velocity Band 1 Total Distance'], 5))
 # plt.show()
 
 print(df.shape)
+
+grouped2 = df.groupby('Position Name')
+print(grouped2.head())
+positionVsID = grouped2['ID'].agg(lambda x: tuple(x.unique()))
+positionVsIDCount = grouped2['ID'].nunique()
+positionVsIDCount.plot(kind='bar')
+plt.xlabel("Position Code", fontsize=12)
+plt.ylabel("Num of Unique Players", fontsize=12)
+plt.show()
