@@ -1,13 +1,18 @@
 import pandas as pd
 import numpy as np
-import re
 import sklearn
 import xgboost as xgb
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+from sklearn.preprocessing import MinMaxScaler
+
+from tqdm import tqdm_notebook as tqdm
+
 import warnings
-warnings.filterwarnings(action='ignore')
+warnings.simplefilter(action='ignore')
+
+TARGET = 'Position Name'
 
 df = pd.read_csv('data.csv')
 
@@ -46,6 +51,9 @@ df = df[(df["Period Name"]).str.contains("11v11", case=False) == False]
 df = df[(df["Period Name"]).str.contains("9 v 9", case=False) == False]
 df = df[(df["Period Name"]).str.contains("9v9", case=False) == False]
 
+# remove duplicated Session
+df = df[(df["Period Name"]).str.contains("Session", case=False) == False]
+
 # combine all warmups
 df.loc[df['Period Name'].str.contains('war', case=False), 'Period Name'] = 'Warmup'
 
@@ -55,14 +63,13 @@ df.loc[df['Period Name'].str.contains('secon', case=False), 'Period Name'] = 'Ga
 
 # label encode each Period Name
 # Warmup (0), Game (1), Session (2), Misc. (3)
-df.loc[df['Period Name'] == 'Warmup', 'new_period'] = 0
-df.loc[df['Period Name'] == 'Game', 'new_period'] = 1
-df.loc[df['Period Name'] == 'Session', 'new_period'] = 2
-df['new_period'] = df['new_period'].fillna(value=3)
+df.loc[df['Period Name'] == 'Warmup', 'period_name'] = 0
+df.loc[df['Period Name'] == 'Game', 'period_name'] = 1
+df['period_name'] = df['period_name'].fillna(value=2)
 
 df.drop('Period Name', axis=1, inplace=True)
 
-# print(df['new_period'].value_counts())
+# print(df['period_name'].value_counts())
 
 # encode target
 dic = {'Back': 0, 'Forward': 1, 'Mid/Back': 2,
@@ -72,8 +79,7 @@ df["Position Name"] = df["Position Name"].apply(lambda x: dic[x])
 # convert new features to int8
 df["ID"] = df["ID"].astype('int8')
 df["practice_or_game"] = df["practice_or_game"].astype('int8')
-df["new_period"] = df["new_period"].astype('int8')
-
+df["period_name"] = df["period_name"].astype('int8')
 
 # filter out invalid distances
 df = df[(df["Total Distance"] < 20000) & (df["Total Distance"] > 50)]
@@ -92,3 +98,58 @@ df = df[(df["Maximum Velocity"] > 2) & (df["Maximum Velocity"] < 8)]
 
 # removed all null
 df = df.dropna(how='any',axis=0)
+
+features_n = ['Total Player Load', 'Total Distance', 'Tot IMA',
+              'High Speed Distance', 'IMA Accel High', 'IMA Accel Low',
+              'IMA Accel Medium', 'IMA CoD Left High', 'IMA CoD Left Low',
+              'IMA CoD Left Medium', 'IMA CoD Right High', 'IMA CoD Right Low',
+              'IMA CoD Right Medium', 'IMA Decel High', 'IMA Decel Low',
+              'IMA Decel Medium', 'Maximum Velocity', 'Meterage Per Minute',
+              'Player Load Per Minute', 'Velocity Band 1 Total Distance',
+              'Velocity Band 2 Total Distance', 'Velocity Band 3 Total Distance',
+              'Velocity Band 4 Total Distance', 'Velocity Band 5 Total Distance']
+
+# normalize data by players
+def normalize_by_players(df):
+    players = df["ID"].unique()
+    for player in players:
+        ids = df[df["ID"] == player].index
+        scaler = MinMaxScaler()
+        df.loc[ids, features_n] = scaler.fit_transform(df.loc[ids, features_n])
+
+    return df
+
+
+# corrmat = df.corr()
+# k = 10 #number of variables for heatmap
+# cols = corrmat.nlargest(k, 'Total Player Load')['Total Player Load'].index
+# cm = np.corrcoef(df[cols].values.T)
+# sns.set(font_scale=1.25)
+# hm = sns.heatmap(cm, cbar=True, annot=True, square=True, fmt='.2f', annot_kws={'size': 10}, yticklabels=cols.values, xticklabels=cols.values)
+# plt.show()
+
+plt.figure(figsize=(8,6))
+sns.violinplot(x='Position Name', y='Total Player Load', data=df)
+plt.ylabel("Player Load", fontsize=12)
+plt.xlabel("Position Name", fontsize=12)
+plt.title("Position Name vs Player Load", fontsize=15)
+plt.show()
+
+# plt.figure(figsize=(8,6))
+# sns.countplot(df[TARGET])
+# plt.xlabel("Position Code", fontsize=12)
+# plt.ylabel("Count", fontsize=12)
+# plt.title("Position vs Count", fontsize=15)
+# plt.show()
+
+# plt.figure(figsize=(8,6))
+# sns.catplot(x=df[TARGET], y=df['ID'].unique(), data=df, kind='bar')
+# plt.xlabel("Position Code", fontsize=12)
+# plt.ylabel("Num of Unique Players", fontsize=12)
+# plt.title("Position Code vs Num of Unique Players", fontsize=15)
+# plt.show()
+
+print(df['ID'])
+# normalize_by_players(df)
+
+print(df.head())
